@@ -2,8 +2,14 @@ package com.arka.classroom.arka.project.entities;
 
 import com.arka.classroom.arka.project.entities.enums.TipoUsuario;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.List;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "clientes")
 public class Cliente {
     @Id
@@ -25,22 +31,16 @@ public class Cliente {
     @Column()
     private String dni;
 
-    public Cliente() {
-    }
-
-    public Cliente(String name, TipoUsuario tipoUsuario, String email, String phone, String dni) {
-
-        this.name = name;
-        this.tipoUsuario = tipoUsuario;
-        this.email = email;
-        this.phone = phone;
-        this.dni = dni;
-    }
+    @OneToOne(mappedBy = "cliente")
+    private Carrito carrito;
 
     public Long getId() {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -80,5 +80,13 @@ public class Cliente {
 
     public void setDni(String dni) {
         this.dni = dni;
+    }
+
+    public Carrito getCarrito() {
+        return carrito;
+    }
+
+    public void setCarrito(Carrito carrito) {
+        this.carrito = carrito;
     }
 }

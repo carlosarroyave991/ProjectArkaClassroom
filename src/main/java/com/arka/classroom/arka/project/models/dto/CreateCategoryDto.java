@@ -1,54 +1,50 @@
 package com.arka.classroom.arka.project.models.dto;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.util.Date;
 
-
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateCategoryDto {
     @NotBlank()
-    String nombre;
+    String name;
 
     @NotBlank()
-    String descripcion;
+    String description;
 
     @NotBlank()
-    String imagen;
+    String image;
 
     @NotBlank()
     Date activeSince;
 
-    //Constructor
-    public CreateCategoryDto(String nombre, String descripcion, String imagen, Date activeSince) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.imagen = imagen;
-        this.activeSince = activeSince;
+    public String getName() {
+        return name;
     }
 
-    //Getters and Setters
-    public String getNombre() {
-        return nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public String getDescription() {
+        return description;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public String getImage() {
+        return image;
     }
 
-    public String getImagen() {
-        return imagen;
-    }
-
-    public void setImagen(String imagen) {
-        this.imagen = imagen;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public Date getActiveSince() {
@@ -57,9 +53,5 @@ public class CreateCategoryDto {
 
     public void setActiveSince(Date activeSince) {
         this.activeSince = activeSince;
-    }
-
-    public String getDescription() {
-        return this.descripcion;
     }
 }

@@ -1,54 +1,70 @@
 package com.arka.classroom.arka.project.controllers;
 
+import com.arka.classroom.arka.project.entities.Categoria;
+import com.arka.classroom.arka.project.models.dto.CreateCategoryDto;
+import com.arka.classroom.arka.project.services.CategoriaService;
+import com.arka.classroom.arka.project.services.exception.ClientException;
+import com.arka.classroom.arka.project.services.exception.GeneralException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/categoria")
 public class CategoryController {
 
-    /*@Autowired
-    CategoryRepository categoryRepository;
+    @Autowired
+    CategoriaService categoriaService;
 
-    private List<CreateCategoryDto> categorias;
-
-    public CategoryController() {
-        this.categorias = new ArrayList<>();
-        categorias.add(new CreateCategoryDto((long) 1L,"camara web","nueva, la mejor","imagen"));
-        categorias.add(new CreateCategoryDto((long) 2L,"computadora","lorem insup","imagen"));
-        categorias.add(new CreateCategoryDto((long) 3L,"smartwatch","carros voladores","imagen"));
+    @GetMapping
+    public List<Categoria> findAll() {
+        return categoriaService.findAll();
     }
 
-    //@GetMapping(value = "/api/welcome")
-    @RequestMapping(value = "/category", method = RequestMethod.GET)
-    public List<CreateCategoryDto> getAll(){
-        return categorias;
+    @GetMapping("/{id}")
+    public ResponseEntity<Categoria> findById(@PathVariable Long id) {
+        Optional<Categoria> categoria = categoriaService.findById(id);
+        return categoria.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    *//**
-     * Query paths
-     * *//*
-    @RequestMapping(value = "/category/{id}", method = RequestMethod.GET)
-    public ResponseEntity<CreateCategoryDto> getById(@PathVariable(value = "id")Long id){
-        //busca por id
-        Optional<CreateCategoryDto> dato = categorias.stream()
-                .filter(categoria -> categoria.getId() == id)
-                .findFirst();
-        return dato.map(createCategoryDto -> new ResponseEntity<>(createCategoryDto, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    *//**
-     * Query params
-     * *//*
-    @GetMapping(value = "/category/search")
-    public List<CreateCategoryDto> search(
-            @RequestParam(name = "nombre", required = false)String nombre){
-        if(nombre != null && !nombre.isEmpty()){
-            return categorias.stream()
-                    .filter(categoria -> categoria.getNombre().equalsIgnoreCase(nombre))
-                    .collect(Collectors.toList());
+    @GetMapping("/nombre/{name}")
+    public ResponseEntity<List<Categoria>> findByName(@PathVariable String name) {
+        try {
+            List<Categoria> categorias = categoriaService.findByName(name);
+            return ResponseEntity.ok(categorias);
+        } catch (GeneralException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        return categorias;
-    }*/
+    }
+
+    @PostMapping
+    public ResponseEntity<Categoria> save(@RequestBody CreateCategoryDto categoryDto) {
+        try {
+            Categoria savedCategoria = categoriaService.save(categoryDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedCategoria);
+        } catch (GeneralException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Categoria> update(@PathVariable Long id, @RequestBody CreateCategoryDto categoryDto) {
+        try {
+            Categoria updatedCategoria = categoriaService.update(id, categoryDto);
+            return ResponseEntity.ok(updatedCategoria);
+        } catch (ClientException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        categoriaService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 
 }

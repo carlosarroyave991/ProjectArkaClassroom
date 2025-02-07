@@ -6,23 +6,16 @@ import jakarta.validation.constraints.NotBlank;
 
 public class CreateMarcaDto {
     @NotBlank()
-    private String name;
+    String name;
 
     @NotBlank()
-    private String description;
+    String description;
 
     @NotBlank()
-    private String logo;
+    String logo;
 
     @NotBlank()
-    private Country country;
-
-    public CreateMarcaDto(String name, String description, String logo, Country country) {
-        this.name = name;
-        this.description = description;
-        this.logo = logo;
-        this.country = country;
-    }
+    Country country;
 
     public String getName() {
         return name;

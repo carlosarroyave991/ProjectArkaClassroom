@@ -1,6 +1,7 @@
 package com.arka.classroom.arka.project.controllers;
 
 import com.arka.classroom.arka.project.entities.Producto;
+import com.arka.classroom.arka.project.models.dto.CreateProductoDto;
 import com.arka.classroom.arka.project.services.ProductoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +35,13 @@ public class ProductoController {
     }
 
     @PostMapping
-    public ResponseEntity<Producto> save(@Valid @RequestBody Producto producto){
-        return new ResponseEntity<>(productoService.save(producto), HttpStatus.CREATED);
+    public ResponseEntity<Producto> save(@Valid @RequestBody CreateProductoDto productoDto){
+        return new ResponseEntity<>(productoService.save(productoDto), HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<Producto> update(@Valid @RequestBody Producto producto){
-        return new ResponseEntity<>(productoService.update(producto), HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<Producto> update(@PathVariable("id")Long id, @Valid @RequestBody CreateProductoDto productoDto){
+        return new ResponseEntity<>(productoService.update(id, productoDto), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

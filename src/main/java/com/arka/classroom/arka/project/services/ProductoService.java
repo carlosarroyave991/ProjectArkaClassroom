@@ -1,10 +1,12 @@
 package com.arka.classroom.arka.project.services;
 
 import com.arka.classroom.arka.project.entities.Producto;
+import com.arka.classroom.arka.project.models.dto.CreateProductoDto;
 import com.arka.classroom.arka.project.repositorys.ProductoRepository;
 import com.arka.classroom.arka.project.services.exception.ProductException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -46,13 +48,22 @@ public class ProductoService {
         }
     }
 
-    public Producto save(Producto producto){
-        return productoRepository.save(producto);
+    public Producto save(CreateProductoDto productoDto){
+        List<Producto> productoList = productoRepository.findByName(productoDto.getName());
+        if (productoList.isEmpty()){
+            Producto producto = new Producto();
+            BeanUtils.copyProperties(productoDto, producto);
+            return productoRepository.save(producto);
+        }else{
+            throw new ProductException(PRODUCT_YA_EXISTE);
+        }
     }
 
-    public Producto update(Producto producto){
-        Optional<Producto> result = productoRepository.findById(producto.getId());
+    public Producto update(Long id,CreateProductoDto productoDto){
+        Optional<Producto> result = productoRepository.findById(id);
         if(result.isPresent()){
+            Producto producto = new Producto();
+            BeanUtils.copyProperties(productoDto,producto);
             return productoRepository.save(producto);
         }else {
             throw new ProductException(ID_NO_ENCONTRADO);
