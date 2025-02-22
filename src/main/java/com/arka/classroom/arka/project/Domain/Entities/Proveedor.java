@@ -18,10 +18,9 @@ public class Proveedor {
     private Long id;
 
     @Column
-    private String nombre;
+    private String name;
 
     @ManyToMany(mappedBy = "proveedores", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference
     private List<Producto> productos;
 
     public Long getId() {
@@ -32,12 +31,12 @@ public class Proveedor {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<Producto> getProductos() {

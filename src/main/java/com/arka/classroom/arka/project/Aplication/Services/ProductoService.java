@@ -7,6 +7,7 @@ import com.arka.classroom.arka.project.Domain.Entities.Pedido;
 import com.arka.classroom.arka.project.Domain.Entities.Producto;
 import com.arka.classroom.arka.project.Aplication.models.dto.CreateProductoDto;
 import com.arka.classroom.arka.project.Domain.Repositorys.*;
+import com.arka.classroom.arka.project.infraestructure.Mappers.CategoriaMapper;
 import com.arka.classroom.arka.project.infraestructure.Mappers.ProductoMapper;
 import com.arka.classroom.arka.project.infraestructure.Response.OnlyProductoResponse;
 import com.arka.classroom.arka.project.infraestructure.Response.ProductosByCategoriaResponse;
@@ -42,6 +43,9 @@ public class ProductoService {
 
     @Autowired
     ProductoMapper productoMapper;
+
+    @Autowired
+    CategoriaMapper categoriaMapper;
 
     /**
      * Funcion que consulta todos los productos con sus categorias
@@ -138,8 +142,7 @@ public class ProductoService {
     private Categoria getOrCreateCategoria (CreateCategoriaDto categoriaDto){
         List<Categoria> categoriaList = categoriaRepository.findByName(categoriaDto.getName());
         if (categoriaList.isEmpty()) {
-            Categoria newCategoria = new Categoria();
-            BeanUtils.copyProperties(categoriaDto, newCategoria);
+            Categoria newCategoria = categoriaMapper.toEntity(categoriaDto);
             newCategoria.setActiveSince(new Date());
             return categoriaRepository.save(newCategoria);
         } else {

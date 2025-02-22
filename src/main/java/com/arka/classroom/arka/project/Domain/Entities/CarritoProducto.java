@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @AllArgsConstructor
@@ -23,6 +24,7 @@ public class CarritoProducto {
 
     @Column(name = "cantidad")
     private Integer amount;
+
 
     @ManyToOne
     @JoinColumn(name = "carrito_id", nullable = false)

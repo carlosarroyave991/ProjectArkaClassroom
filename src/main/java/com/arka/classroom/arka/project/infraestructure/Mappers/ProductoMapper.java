@@ -16,10 +16,10 @@ public interface ProductoMapper {
 
     ProductoMapper INSTANCE = Mappers.getMapper(ProductoMapper.class);
 
-    @Mapping(source = "categoria", target = "categoria")
+    @Mapping(source = "id", target = "id")
     CreateProductoDto productoToCreateProductoDto(Producto producto);
 
-    @Mapping(source = "categoria", target = "categoria")
+    @Mapping(source = "id", target = "id")
     Producto createProductoDtoToProducto(CreateProductoDto createProductoDto);
 
     @Mapping(source = "id", target = "id")

@@ -28,7 +28,10 @@ public class Pedido {
     @Column(name = "fecha_orden")
     private Date date;
 
-    @Column(name = "total", precision = 10,scale = 2, nullable = false)
+    @Column(name = "cantidad_total")
+    private BigDecimal amountValue;
+
+    @Column(name = "precio_total", precision = 10,scale = 2, nullable = false)
     private BigDecimal salePrice;
 
     @Enumerated(value = EnumType.STRING)
@@ -43,6 +46,15 @@ public class Pedido {
     @JoinColumn(name = "carrito_id",nullable = false)
     @JsonBackReference
     private Carrito carrito;
+
+
+    public BigDecimal getAmountValue() {
+        return amountValue;
+    }
+
+    public void setAmountValue(BigDecimal amountValue) {
+        this.amountValue = amountValue;
+    }
 
     public Long getId() {
         return id;

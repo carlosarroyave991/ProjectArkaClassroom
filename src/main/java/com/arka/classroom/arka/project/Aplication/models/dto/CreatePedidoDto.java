@@ -12,11 +12,15 @@ import java.util.Date;
 @NoArgsConstructor
 public class CreatePedidoDto {
 
+    Long id;
+
     String metodoPago;
 
     Long reference;
 
     Date date;
+
+    BigDecimal amountValue;
 
     BigDecimal salePrice;
 
@@ -25,6 +29,22 @@ public class CreatePedidoDto {
     /*CreateClienteDto cliente;*/
 
     CreateCarritoDto carrito;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public BigDecimal getAmountValue() {
+        return amountValue;
+    }
+
+    public void setAmountValue(BigDecimal amountValue) {
+        this.amountValue = amountValue;
+    }
 
     public String getMetodoPago() {
         return metodoPago;

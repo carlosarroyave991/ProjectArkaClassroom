@@ -45,7 +45,6 @@ public class Producto {
             joinColumns = @JoinColumn(name = "producto_id"),
             inverseJoinColumns = @JoinColumn(name = "proveedor_id")
     )
-    @JsonManagedReference
     private List<Proveedor> proveedores;
 
     public Long getId() {

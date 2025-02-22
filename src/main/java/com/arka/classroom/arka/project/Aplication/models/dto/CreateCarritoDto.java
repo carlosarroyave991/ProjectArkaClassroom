@@ -15,10 +15,6 @@ public class CreateCarritoDto {
 
     CreateClienteDto cliente;
 
-    List<CreateCarritoProductoDto> carritoProductos;
-
-    Pedido pedido;
-
     public Long getId() {
         return id;
     }
@@ -35,19 +31,4 @@ public class CreateCarritoDto {
         this.cliente = cliente;
     }
 
-    public List<CreateCarritoProductoDto> getCarritoProductos() {
-        return carritoProductos;
-    }
-
-    public void setCarritoProductos(List<CreateCarritoProductoDto> carritoProductos) {
-        this.carritoProductos = carritoProductos;
-    }
-
-    public Pedido getPedido() {
-        return pedido;
-    }
-
-    public void setPedido(Pedido pedido) {
-        this.pedido = pedido;
-    }
 }

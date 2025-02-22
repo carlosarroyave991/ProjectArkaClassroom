@@ -1,14 +1,19 @@
 package com.arka.classroom.arka.project.Domain.Entities;
 
 import com.arka.classroom.arka.project.Domain.Entities.enums.TipoUsuario;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "clientes")
 public class Cliente {
     @Id
@@ -30,9 +35,8 @@ public class Cliente {
     @Column()
     private String dni;
 
-    @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private Carrito carrito;
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Carrito> carritos;
 
     public Long getId() {
         return id;
@@ -82,11 +86,11 @@ public class Cliente {
         this.dni = dni;
     }
 
-    public Carrito getCarrito() {
-        return carrito;
+    public List<Carrito> getCarritos() {
+        return carritos;
     }
 
-    public void setCarrito(Carrito carrito) {
-        this.carrito = carrito;
+    public void setCarritos(List<Carrito> carritos) {
+        this.carritos = carritos;
     }
 }
