@@ -20,7 +20,12 @@ public class Proveedor {
     @Column
     private String name;
 
-    @ManyToMany(mappedBy = "proveedores", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany
+    @JoinTable(
+            name = "producto_proveedor",
+            joinColumns = @JoinColumn(name = "proveedor_id"),
+            inverseJoinColumns =  @JoinColumn(name = "producto_id")
+    )
     private List<Producto> productos;
 
     public Long getId() {

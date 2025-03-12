@@ -3,30 +3,24 @@ package com.arka.classroom.arka.project.Aplication.Services;
 import com.arka.classroom.arka.project.Aplication.Services.exception.GeneralException;
 import com.arka.classroom.arka.project.Aplication.models.dto.CreateCarritoDto;
 import com.arka.classroom.arka.project.Aplication.models.dto.CreateCarritoProductoDto;
-import com.arka.classroom.arka.project.Aplication.models.dto.CreateClienteDto;
-import com.arka.classroom.arka.project.Aplication.models.dto.CreateProductoDto;
-import com.arka.classroom.arka.project.Domain.Entities.Carrito;
-import com.arka.classroom.arka.project.Domain.Entities.CarritoProducto;
-import com.arka.classroom.arka.project.Domain.Entities.Cliente;
-import com.arka.classroom.arka.project.Domain.Entities.Producto;
+import com.arka.classroom.arka.project.Domain.Entities.*;
 import com.arka.classroom.arka.project.Domain.Repositorys.*;
 import com.arka.classroom.arka.project.infraestructure.Mappers.CarritoMapper;
 import com.arka.classroom.arka.project.infraestructure.Mappers.CarritoProductoMapper;
+import com.arka.classroom.arka.project.infraestructure.Mappers.ProductoMapper;
 import com.arka.classroom.arka.project.infraestructure.Response.CreateCarritoProductoResponse;
+import com.arka.classroom.arka.project.infraestructure.Response.OnlyCarritoResponse;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
+
 @AllArgsConstructor
 @Service
 public class CarritoService {
@@ -58,140 +52,175 @@ public class CarritoService {
     @Autowired
     CarritoMapper carritoMapper;
 
-    public List<CreateCarritoDto> getAll(){
+    @Autowired
+    ProductoMapper productoMapper;
+
+
+    public List<OnlyCarritoResponse> getAll() {
         List<Carrito> carritos = carritoRepository.findAll();
-        return carritos.stream()
-                .map(carritoMapper::toDto)
-                .collect(Collectors.toList());
+
+        return carritoMapper.carritoToResponse(carritos);
     }
 
-    public Optional<Carrito> findById(Long id){
+    public Optional<Carrito> findById(Long id) {
         Optional<Carrito> producto = carritoRepository.findById(id);
-        if(producto.isPresent()){
+        if (producto.isPresent()) {
             return producto;
-        }else{
-            throw new GeneralException(ID_NO_ENCONTRADO);
-        }
-    }
-
-
-    /**
-     * Funcion que llenara el carrito de compras
-     * @return retorna la entidad carritoProductos con los datos necesarios
-     * @throws GeneralException Indica que el id no ha sido encontrado
-     */
-    public CarritoProducto agregarProductoAlCarrito(Long carritoId, Long productoId, Integer cantidad){
-        Optional<Carrito> carritoOptional = carritoRepository.findById(carritoId);
-        Optional<Producto> productoOptional = productoRepository.findById(productoId);
-        if (carritoOptional.isEmpty()) {
-            throw new GeneralException(ID_NO_ENCONTRADO);
-        }
-
-        if (productoOptional.isEmpty()) {
-            throw new GeneralException(ID_NO_ENCONTRADO);
-        }
-
-        Carrito carrito = carritoOptional.get();
-        Producto producto = productoOptional.get();
-
-        //Verifica si el producto ya esta en el carrito
-        Optional<CarritoProducto> carritoProductoOptional = carritoRepository.findByCarritoAndProducto(carrito, producto);
-        CarritoProducto carritoProducto;
-        if (carritoProductoOptional.isPresent()) {
-            // Si el producto ya está en el carrito, actualizar la cantidad
-            carritoProducto = carritoProductoOptional.get();
-            carritoProducto.setAmount(carritoProducto.getAmount() + cantidad);
         } else {
-            // Si el producto no está en el carrito, crear una nueva relación
-            carritoProducto = new CarritoProducto();
-            carritoProducto.setProducto(producto);
-            carritoProducto.setCarrito(carrito);
-            carritoProducto.setAmount(cantidad);
-            carritoProducto.setCreatedDate(new Date());
+            throw new GeneralException(ID_NO_ENCONTRADO);
         }
-        return carritoProductoRepository.save(carritoProducto);
     }
 
-    /**
-     * Funcion que lista los productos del carrito
-     * @param carritoId tiene el id del carrito a listarle los productos
-     * @throws GeneralException trae un mensaje de advertencia
-     * */
-    public List<CreateProductoDto> listarProductosByCarritoId(Long carritoId) {
-        Carrito carrito = carritoRepository.findById(carritoId)
-                .orElseThrow(() -> new GeneralException(ID_NO_ENCONTRADO));
-
-        List<CreateProductoDto> productosDto = carrito.getCarritoProductos().stream()
-                .map(carritoProducto -> carritoMapper.productoToDto(carritoProducto.getProducto()))
-                .collect(Collectors.toList());
-
-        return productosDto;
-    }
 
     /**
-     * Funcion que me permite guardar un carrito
-     * @param carritoProductoDto el objeto que tiene la data
-     * @return un dto mapeado
+     * Funcion para crear el carrito de compras
+     * @return retorna la creacion de un carrito con sus productos
      */
-    public CreateCarritoProductoResponse save(CreateCarritoProductoDto carritoProductoDto){
-        // 1) creamos el carrito
-        Carrito carrito = CreateCarrito(carritoProductoDto.getCarrito());
-        // 2) obtenemos el primer producto
-        Producto producto = getProductosToCarrito(carritoProductoDto.getProducto());
-        // 3) creamos el carritoProducto y le pasamos la informacion obtenida
-        CarritoProducto newCarritoProducto = new CarritoProducto();
-        newCarritoProducto.setCarrito(carrito);
-        newCarritoProducto.setProducto(producto);
-        newCarritoProducto.setCreatedDate(new Date());
-        newCarritoProducto.setAmount(carritoProductoDto.getAmount());
+    public List<CreateCarritoProductoResponse> crearCarrito(CreateCarritoDto carritoDto) {
+        //1) Buscar al cliente
+        Cliente cliente = clienteRepository.findById(carritoDto.getCliente().getId()).orElseThrow(() -> new GeneralException(ID_CLIENTE_NO_ENCONTRADO));
 
-        carritoProductoRepository.save(newCarritoProducto);
-
-        CreateCarritoProductoResponse carritoProductoResponse = carritoProductoMapper.carritoProductoToCreateCarritoProductoResponse(newCarritoProducto);
-        return carritoProductoResponse;
-    }
-
-    /**
-     * Funcion que me crea el carrito y le asigna un cliente
-     * @param carritoDto objeto que lleva el id del cliente y el carrito
-     * @return retorna el objeto carrito creado
-     */
-    public Carrito CreateCarrito(CreateCarritoDto carritoDto){
-        Cliente cliente = getCliente(carritoDto.getCliente().getId());
+        //2) Creamos el carrito
         Carrito carrito = new Carrito();
         carrito.setCliente(cliente);
+        carrito.setCreatedDate(new Date());
+
+        //Guardamos el carrito y aseguramos que tenga un ID
+        carrito = carritoRepository.save(carrito);
+
+        // Verificar que el carrito tiene un ID
+        if (carrito.getId() == null) {
+            throw new GeneralException("El carrito no tiene un ID después de ser guardado.");
+        }
+
+        //3)Crear los CarritoProducto y asocialos al carrito
+        List<CarritoProducto> carritoProductoList = getProducto(carritoDto.getCarritoProductos());
+
+        // Establecer el carrito para cada CarritoProducto
+        for (CarritoProducto cp : carritoProductoList) {
+            cp.setCarrito(carrito);
+        }
+
+        //4)Guardar los CarritoProducto en el repositorio
+        carritoProductoRepository.saveAll(carritoProductoList);
+
+        //5)Asociar la lista de carritoProducto al carrito y guardarlo nuevamente
+        carrito.setCarritoProductos(carritoProductoList);
+        carrito = carritoRepository.save(carrito);
+
+        //6)Convertir a CreateCarritoProductoResponse y devolver una respuesta
+        List<CreateCarritoProductoResponse> response = carritoProductoMapper.carritoProductoToCreateCarritoProductoResponse(carritoProductoList);
+
+        return response;
+    }
+
+    /**
+     * NoService que me traera la informacion de los productos
+     * @param carritoProductoDto
+     * @return
+     */
+    private List<CarritoProducto> getProducto(List<CreateCarritoProductoDto> carritoProductoDto){
+        List<CarritoProducto> carritoProductos = new ArrayList<>();
+
+        // Iterar sobre cada objeto CreateCarritoProductoDto en la lista carritoProductoDto
+        for (CreateCarritoProductoDto createCarritoProductoDto : carritoProductoDto) {
+            // Verificación nula para productos
+            if (createCarritoProductoDto.getProductos() != null) {
+                Optional<Producto> producto = productoRepository.findById(createCarritoProductoDto.getProductos().getId());
+                // Verificar si el producto está presente
+                if(producto.isPresent()){
+                    // Crear una nueva instancia de CarritoProducto para cada producto
+                    CarritoProducto newCarritoProducto = new CarritoProducto();
+                    newCarritoProducto.setProducto(producto.get());
+                    newCarritoProducto.setAmount(createCarritoProductoDto.getAmount());
+                    carritoProductos.add(newCarritoProducto);
+                } else {
+                    // Lanzar una excepción si el producto no es encontrado
+                    throw new GeneralException(PRODUCTO_NO_ENCONTRADO);
+                }
+            } else {
+                // Manejar el caso de lista de productos nula
+                System.out.println("Productos es nulo para CreateCarritoProductoDto con ID: " + createCarritoProductoDto.getId());
+            }
+        }
+
+        return carritoProductos;
+    }
+
+
+    /**
+     * Funcion que agregara productos al carrito
+     * @param carritoId
+     * @param productoId
+     * @return
+     */
+    public Carrito agregarProductoAlCarrito(Long carritoId, Long productoId) {
+        Carrito carrito = carritoRepository.findById(carritoId).orElseThrow(() -> new RuntimeException("Carrito no encontrado"));
+        Producto producto = productoRepository.findById(productoId).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        CarritoProducto carritoProducto = new CarritoProducto();
+        carritoProducto.setCarrito(carrito);
+        carritoProducto.setProducto(producto);
+
+        carrito.getCarritoProductos().add(carritoProducto);
         return carritoRepository.save(carrito);
     }
 
     /**
-     * Funcion para obtener un cliente en especifico
-     * @param clienteId se encuentran el id del cliente
-     * @return retorna el objeto cliente en caso de que exista
+     * Funcion que permite actualizar un carrtio por medio del id
+     * @param carritoDto nuevo objeto
+     * @return
      */
-    public Cliente getCliente(Long clienteId){
-        return clienteRepository.findById(clienteId)
+    public CreateCarritoDto updateCarrito(CreateCarritoDto carritoDto) {
+        // 1) Buscar el carrito existente
+        Carrito carrito = carritoRepository.findById(carritoDto.getId())
+                .orElseThrow(() -> new GeneralException(CARRITO_NO_ENCONTRADO));
+
+        // 2) Actualizar la información del carrito
+        Cliente cliente = clienteRepository.findById(carritoDto.getCliente().getId())
                 .orElseThrow(() -> new GeneralException(ID_CLIENTE_NO_ENCONTRADO));
+        carrito.setCliente(cliente);
+        carrito.setCreatedDate(carritoDto.getCreatedDate() != null ? carritoDto.getCreatedDate() : carrito.getCreatedDate());
+
+        // 3) Eliminar los CarritoProducto antiguos
+        carritoProductoRepository.deleteAllByCarritoId(carrito.getId());
+
+        // 4) Crear los nuevos CarritoProducto y asociarlos al carrito
+        List<CarritoProducto> carritoProductoList = getProducto(carritoDto.getCarritoProductos());
+        for (CarritoProducto cp : carritoProductoList) {
+            cp.setCarrito(carrito);
+        }
+
+        // 5) Guardar los nuevos CarritoProducto en el repositorio
+        carritoProductoRepository.saveAll(carritoProductoList);
+
+        // 6) Asociar la lista de carritoProducto al carrito y guardarlo nuevamente
+        carrito.setCarritoProductos(carritoProductoList);
+        carrito = carritoRepository.save(carrito);
+
+        // 7) Eliminar el pedido asociado al carrito si existe
+        Optional<Pedido> pedidoOptional = pedidoRepository.findByCarrito_Id(carrito.getId());
+        pedidoOptional.ifPresent(pedidoRepository::delete);
+
+        // 8) Convertir a CreateCarritoDto y devolver la respuesta
+        CreateCarritoDto response = carritoMapper.toDto(carrito);
+
+        return response;
     }
 
     /**
-     * Funcion para obtener un producto en especifico
-     * @param productoDto objeto donde se encuentra la info del producto
-     * @return retorna el objeto producto en caso de que exista
+     * Servicio que consulta todos los carritos abandonados
+     * @return retorna una lista de carritos abandonados despues de dos horas
      */
-    public Producto getProductosToCarrito(CreateProductoDto productoDto){
-        return productoRepository.findById(productoDto.getId())
-                .orElseThrow(() -> new GeneralException(PRODUCTO_NO_ENCONTRADO));
-    }
+    public List<Carrito> obtenerCarritosAbandonados(){
+            // Calcular la fecha de corte para considerar un carrito abandonado (por ejemplo, 7 días atrás)
+            Calendar calendar = Calendar.getInstance();
+            //calendar.add(Calendar.DAY_OF_YEAR, -7); excepcion de 7 dias
+            calendar.add(Calendar.HOUR_OF_DAY, -2); //excepcion de 2 horas
+            Date thresholdDate = calendar.getTime();
 
-    public Carrito update(Long id,CreateCarritoDto carritoDto){
-        Optional<Carrito> carritoOptional = carritoRepository.findById(id);
-        if(carritoOptional.isPresent()){
-            Carrito carrito = new Carrito();
-            BeanUtils.copyProperties(carritoDto, carrito);
-            return carritoRepository.save(carrito);
-        }else {
-            throw new GeneralException(ID_NO_ENCONTRADO);
-        }
+            // Obtener los carritos abandonados utilizando el metodo derivado
+            return carritoRepository.findByPedidoIsNullAndCreatedDateBefore(thresholdDate);
     }
 
 

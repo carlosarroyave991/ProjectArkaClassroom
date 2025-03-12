@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,13 +19,8 @@ public class CarritoProducto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
-    @Column(name = "fecha_creacion")
-    private Date createdDate;
-
     @Column(name = "cantidad")
     private Integer amount;
-
 
     @ManyToOne
     @JoinColumn(name = "carrito_id", nullable = false)
@@ -33,6 +29,7 @@ public class CarritoProducto {
 
     @ManyToOne
     @JoinColumn(name = "producto_id", nullable = false)
+    @JsonBackReference
     private Producto producto;
 
 
@@ -58,14 +55,6 @@ public class CarritoProducto {
 
     public void setProducto(Producto producto) {
         this.producto = producto;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
     }
 
     public Integer getAmount() {

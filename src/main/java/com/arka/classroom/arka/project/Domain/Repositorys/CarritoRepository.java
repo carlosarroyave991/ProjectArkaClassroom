@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,5 +22,11 @@ public interface CarritoRepository extends JpaRepository<Carrito, Long> {
 
     @Query("SELECT cp FROM CarritoProducto cp WHERE cp.carrito.id = :carritoId")
     List<CarritoProducto> listarProductos(@Param("carritoId") Long carritoId);
+
+    /*@Query("SELECT c FROM Carrito c WHERE c.pedido IS NULL AND c.createdDate < :thresholdDate")
+    List<Carrito> findAbandonedCarts(@Param("thresholdDate") Date thresholdDate);*/
+
+    //metodo derivado de consultar carritos abandonados
+    List<Carrito> findByPedidoIsNullAndCreatedDateBefore(Date thresholdDate);
 
 }

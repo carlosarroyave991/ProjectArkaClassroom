@@ -55,7 +55,7 @@ public class ProductoService {
         //return productoRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
         List<Producto> productos = productoRepository.findAll();
         return productos.stream()
-                .map(productoMapper::productoToCreateProductoDto)
+                .map(productoMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +70,7 @@ public class ProductoService {
             throw new GeneralException(PRODUCT_NO_ENCONTRADO);
         } else {
             return productos.stream()
-                    .map(productoMapper::productoToCreateProductoDto)
+                    .map(productoMapper::toDto)
                     .collect(Collectors.toList());
         }
     }
@@ -83,7 +83,7 @@ public class ProductoService {
     public Optional<CreateProductoDto> findById(Long id) {
         Optional<Producto> producto = productoRepository.findById(id);
         if (producto.isPresent()) {
-            CreateProductoDto productoDto = productoMapper.productoToCreateProductoDto(producto.get());
+            CreateProductoDto productoDto = productoMapper.toDto(producto.get());
             return Optional.of(productoDto);
         } else {
             throw new GeneralException(ID_NO_ENCONTRADO);
@@ -128,12 +128,12 @@ public class ProductoService {
         Categoria categorias = getOrCreateCategoria(productoDto.getCategoria());
 
         // Utiliza el mapper para convertir el DTO a la entidad Producto
-        Producto producto = productoMapper.createProductoDtoToProducto(productoDto);
+        Producto producto = productoMapper.toEntity(productoDto);
         producto.setCategoria(categorias); // Asignar categorías
         Producto savedProducto = productoRepository.save(producto);
 
         //Utiliza el mapper para convertir la entidad guardada de vuelta al DTO
-        return productoMapper.productoToCreateProductoDto(savedProducto);
+        return productoMapper.toDto(savedProducto);
     }
 
     /**
@@ -157,7 +157,7 @@ public class ProductoService {
      * @return devuelve un objeto tipo CreateProductoDto
      */
     public CreateProductoDto convertToDto(Producto producto){
-        return productoMapper.productoToCreateProductoDto(producto);
+        return productoMapper.toDto(producto);
     }
 
     /**
@@ -167,7 +167,7 @@ public class ProductoService {
      * @return Devuelve un objeto tipo Producto
      */
     public Producto convertToEntity(CreateProductoDto createProductoDto){
-        return productoMapper.createProductoDtoToProducto(createProductoDto);
+        return productoMapper.toEntity(createProductoDto);
     }
 
 
@@ -175,7 +175,7 @@ public class ProductoService {
         Producto existingProducto = productoRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(ID_NO_ENCONTRADO));
 
-        Producto updatedProducto = productoMapper.createProductoDtoToProducto(productoDto);
+        Producto updatedProducto = productoMapper.toEntity(productoDto);
 
         // Mantener el ID del producto existente
         updatedProducto.setId(existingProducto.getId());
@@ -195,7 +195,7 @@ public class ProductoService {
         }
 
         Producto savedProducto = productoRepository.save(updatedProducto);
-        return productoMapper.productoToCreateProductoDto(savedProducto);
+        return productoMapper.toDto(savedProducto);
     }
 
 

@@ -1,6 +1,8 @@
 package com.arka.classroom.arka.project.Domain.Repositorys;
 
+import com.arka.classroom.arka.project.Aplication.models.dto.CreatePedidoDto;
 import com.arka.classroom.arka.project.Domain.Entities.Pedido;
+import com.arka.classroom.arka.project.Domain.Entities.Producto;
 import com.arka.classroom.arka.project.Domain.Entities.enums.EstadoPedido;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +30,12 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     List<Pedido> findByDateBetween(Date startDate, Date endDate);
 
+    Optional<Pedido> findByCarrito_Id(Long id);
+
+    /*@Query("SELECT p FROM Pedido p JOIN p.carrito c JOIN c.carritoProductos cp JOIN cp.producto pr WHERE pr.id = :productoId")
+    List<Pedido> findPedidosByProductoId(@Param("productoId") Long productoId);*/
+    //metodo derivado para realizar la consulta de arriba
+    List<Pedido> findByCarrito_CarritoProductos_Producto_Id(Long productoId);
+
+    List<Pedido> findByCarrito_Cliente_Id(Long clienteId);
 }

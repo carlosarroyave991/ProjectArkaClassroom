@@ -76,11 +76,11 @@ public class ClienteService {
         if(clienteOptional.isPresent()){
             //le pasamos el objeto encontrado y luego le pasamos los datos del dto
             Cliente existingCliente = clienteOptional.get();
-            existingCliente.setName(clienteDto.getName());
-            existingCliente.setTipoUsuario(clienteDto.getTipoUsuario());
-            existingCliente.setEmail(clienteDto.getEmail());
-            existingCliente.setPhone(clienteDto.getPhone());
-            existingCliente.setDni(clienteDto.getDni());
+            if(clienteDto.getName() != null)existingCliente.setName(clienteDto.getName());
+            if(clienteDto.getTipoUsuario() != null)existingCliente.setTipoUsuario(clienteDto.getTipoUsuario());
+            if(clienteDto.getEmail() != null)existingCliente.setEmail(clienteDto.getEmail());
+            if(clienteDto.getPhone() != null)existingCliente.setPhone(clienteDto.getPhone());
+            if(clienteDto.getDni() != null)existingCliente.setDni(clienteDto.getDni());
             
             //Guardamos
             existingCliente = clienteRepository.save(existingCliente);

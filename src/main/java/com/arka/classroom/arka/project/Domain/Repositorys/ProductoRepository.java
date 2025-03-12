@@ -1,6 +1,9 @@
 package com.arka.classroom.arka.project.Domain.Repositorys;
 
+import com.arka.classroom.arka.project.Aplication.models.dto.CreatePedidoDto;
+import com.arka.classroom.arka.project.Aplication.models.dto.CreateProductoDto;
 import com.arka.classroom.arka.project.Domain.Entities.Categoria;
+import com.arka.classroom.arka.project.Domain.Entities.Pedido;
 import com.arka.classroom.arka.project.Domain.Entities.Producto;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;

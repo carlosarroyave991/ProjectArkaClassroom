@@ -17,10 +17,10 @@ public interface ProductoMapper {
     ProductoMapper INSTANCE = Mappers.getMapper(ProductoMapper.class);
 
     @Mapping(source = "id", target = "id")
-    CreateProductoDto productoToCreateProductoDto(Producto producto);
+    CreateProductoDto toDto(Producto producto);
 
     @Mapping(source = "id", target = "id")
-    Producto createProductoDtoToProducto(CreateProductoDto createProductoDto);
+    Producto toEntity(CreateProductoDto createProductoDto);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
@@ -29,6 +29,7 @@ public interface ProductoMapper {
     @Mapping(source = "stock", target = "stock")
     OnlyProductoResponse productoToOnlyProductoResponse(Producto producto);
 
+    /*Producto productoDtoListToProducto(List<CreateProductoDto> productoDtos);*/
 
     @Mapping(source = "productos", target = "productosResponseList")
     ProductosByCategoriaResponse categoriaAndProductosToProductosByCategoriaResponse(Categoria categoria, List<OnlyProductoResponse> productos);

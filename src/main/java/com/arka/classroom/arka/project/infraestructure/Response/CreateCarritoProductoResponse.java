@@ -2,11 +2,14 @@ package com.arka.classroom.arka.project.infraestructure.Response;
 
 import com.arka.classroom.arka.project.Aplication.models.dto.CreateCarritoDto;
 import com.arka.classroom.arka.project.Aplication.models.dto.CreateClienteDto;
+import com.arka.classroom.arka.project.Aplication.models.dto.CreatePedidoDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,13 +17,15 @@ public class CreateCarritoProductoResponse {
 
     private Long id;
 
-    private Date createdDate;
-
     private Integer amount;
 
-    private CreateCarritoDto carrito;
+    @JsonIgnore
+    private OnlyCarritoResponse carrito;
 
     private OnlyProductoResponse producto;
+
+    private CreatePedidoDto pedido;
+
 
     public Long getId() {
         return id;
@@ -30,11 +35,19 @@ public class CreateCarritoProductoResponse {
         this.id = id;
     }
 
-    public CreateCarritoDto getCarrito() {
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
+    public OnlyCarritoResponse getCarrito() {
         return carrito;
     }
 
-    public void setCarrito(CreateCarritoDto carrito) {
+    public void setCarrito(OnlyCarritoResponse carrito) {
         this.carrito = carrito;
     }
 
@@ -46,19 +59,11 @@ public class CreateCarritoProductoResponse {
         this.producto = producto;
     }
 
-    public Integer getAmount() {
-        return amount;
+    public CreatePedidoDto getPedido() {
+        return pedido;
     }
 
-    public void setAmount(Integer amount) {
-        this.amount = amount;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
+    public void setPedido(CreatePedidoDto pedido) {
+        this.pedido = pedido;
     }
 }

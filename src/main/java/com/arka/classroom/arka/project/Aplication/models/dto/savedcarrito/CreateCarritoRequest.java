@@ -1,5 +1,7 @@
-package com.arka.classroom.arka.project.Aplication.models.dto;
+package com.arka.classroom.arka.project.Aplication.models.dto.savedcarrito;
 
+import com.arka.classroom.arka.project.Aplication.models.dto.CreateCarritoProductoDto;
+import com.arka.classroom.arka.project.Aplication.models.dto.CreateClienteDto;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -8,15 +10,14 @@ import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCarritoDto {
-
+public class CreateCarritoRequest {
     Long id;
 
     Date createdDate;
 
     CreateClienteDto cliente;
 
-    List<CreateCarritoProductoDto> carritoProductos;
+    List<CreateCarritoProductoRequest> carritoProductos;
 
     public Long getId() {
         return id;
@@ -42,12 +43,11 @@ public class CreateCarritoDto {
         this.cliente = cliente;
     }
 
-    public List<CreateCarritoProductoDto> getCarritoProductos() {
+    public List<CreateCarritoProductoRequest> getCarritoProductos() {
         return carritoProductos;
     }
 
-    public void setCarritoProductos(List<CreateCarritoProductoDto> carritoProductos) {
+    public void setCarritoProductos(List<CreateCarritoProductoRequest> carritoProductos) {
         this.carritoProductos = carritoProductos;
     }
-
 }

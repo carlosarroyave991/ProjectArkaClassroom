@@ -2,6 +2,8 @@ package com.arka.classroom.arka.project.Domain.Entities;
 
 import com.arka.classroom.arka.project.Domain.Entities.enums.EstadoPedido;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Locale;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,11 +45,15 @@ public class Pedido {
     @JsonBackReference
     private Cliente cliente;*/
 
+    @JsonIgnore
     @OneToOne
-    @JoinColumn(name = "carrito_id",nullable = false)
+    @JoinColumn(name = "carrito_id", nullable = false)
     @JsonBackReference
     private Carrito carrito;
 
+    public Long getCarritoId(){
+        return carrito != null ? carrito.getId() : null;
+    }
 
     public BigDecimal getAmountValue() {
         return amountValue;
@@ -92,8 +99,16 @@ public class Pedido {
         return estadoPedido;
     }
 
-    public void setEstadoPedido(EstadoPedido estadoPedido) {
-        this.estadoPedido = estadoPedido;
+    public void setEstadoPedido(String estadoPedido) {
+        if (estadoPedido != null) {
+            try {
+                this.estadoPedido = EstadoPedido.valueOf(estadoPedido.toLowerCase());
+            } catch (IllegalArgumentException e) {
+                this.estadoPedido = EstadoPedido.pendiente;
+            }
+        } else {
+            this.estadoPedido = EstadoPedido.pendiente; // Valor predeterminado si es null
+        }
     }
 
     /*public Cliente getCliente() {

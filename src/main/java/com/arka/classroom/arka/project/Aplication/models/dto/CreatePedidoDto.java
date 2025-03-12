@@ -1,6 +1,7 @@
 package com.arka.classroom.arka.project.Aplication.models.dto;
-
 import com.arka.classroom.arka.project.Domain.Entities.enums.EstadoPedido;
+import com.arka.classroom.arka.project.infraestructure.Response.OnlyCarritoResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -28,7 +29,7 @@ public class CreatePedidoDto {
 
     /*CreateClienteDto cliente;*/
 
-    CreateCarritoDto carrito;
+    OnlyCarritoResponse carrito;
 
     public Long getId() {
         return id;
@@ -74,16 +75,24 @@ public class CreatePedidoDto {
         return estadoPedido;
     }
 
-    public void setEstadoPedido(EstadoPedido estadoPedido) {
-        this.estadoPedido = estadoPedido;
+    public void setEstadoPedido(String estadoPedido) {
+        if (estadoPedido != null) {
+            try {
+                this.estadoPedido = EstadoPedido.valueOf(estadoPedido.toLowerCase());
+            } catch (IllegalArgumentException e) {
+                this.estadoPedido = EstadoPedido.pendiente;
+            }
+        } else {
+            this.estadoPedido = EstadoPedido.pendiente; // Valor predeterminado si es null
+        }
     }
 
-    public void setCarrito(CreateCarritoDto carrito) {
-        this.carrito = carrito;
-    }
-
-    public CreateCarritoDto getCarrito() {
+    public OnlyCarritoResponse getCarrito() {
         return carrito;
+    }
+
+    public void setCarrito(OnlyCarritoResponse carrito) {
+        this.carrito = carrito;
     }
 
     public Long getReference() {

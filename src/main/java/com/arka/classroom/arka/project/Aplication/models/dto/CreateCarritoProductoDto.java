@@ -1,13 +1,12 @@
 package com.arka.classroom.arka.project.Aplication.models.dto;
 
-import com.arka.classroom.arka.project.Domain.Entities.Carrito;
-import com.arka.classroom.arka.project.Domain.Entities.Producto;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import com.arka.classroom.arka.project.infraestructure.Response.OnlyProductoResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,13 +14,12 @@ public class CreateCarritoProductoDto {
 
     Long id;
 
-    Date createdDate;
-
     Integer amount;
 
+    @JsonIgnore
     CreateCarritoDto carrito;
 
-    CreateProductoDto producto;
+    CreateProductoDto productos;
 
     public Long getId() {
         return id;
@@ -29,14 +27,6 @@ public class CreateCarritoProductoDto {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
     }
 
     public Integer getAmount() {
@@ -55,11 +45,11 @@ public class CreateCarritoProductoDto {
         this.carrito = carrito;
     }
 
-    public CreateProductoDto getProducto() {
-        return producto;
+    public CreateProductoDto getProductos() {
+        return productos;
     }
 
-    public void setProducto(CreateProductoDto producto) {
-        this.producto = producto;
+    public void setProductos(CreateProductoDto productos) {
+        this.productos = productos;
     }
 }

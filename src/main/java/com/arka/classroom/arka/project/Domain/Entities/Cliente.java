@@ -2,6 +2,7 @@ package com.arka.classroom.arka.project.Domain.Entities;
 
 import com.arka.classroom.arka.project.Domain.Entities.enums.TipoUsuario;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -35,6 +36,7 @@ public class Cliente {
     @Column()
     private String dni;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Carrito> carritos;
 

@@ -32,7 +32,8 @@ public class Producto {
     private Integer stock;
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CarritoProducto> carritoProductoList;
+    @JsonManagedReference
+    private List<CarritoProducto> carritos;
 
     @ManyToOne
     @JoinColumn(name = "categoria_id")
@@ -88,12 +89,12 @@ public class Producto {
     }
 
 
-    public List<CarritoProducto> getCarritoProductoList() {
-        return carritoProductoList;
+    public List<CarritoProducto> getCarritos() {
+        return carritos;
     }
 
-    public void setCarritoProductoList(List<CarritoProducto> carritoProductoList) {
-        this.carritoProductoList = carritoProductoList;
+    public void setCarritos(List<CarritoProducto> carritos) {
+        this.carritos = carritos;
     }
 
     public List<Proveedor> getProveedores() {
