@@ -1,18 +1,15 @@
 package com.arka.classroom.arka.project.Domain.Entities;
 
 import com.arka.classroom.arka.project.Domain.Entities.enums.TipoUsuario;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "clientes")
@@ -36,9 +33,27 @@ public class Cliente {
     @Column()
     private String dni;
 
+    @OneToOne
+    @JoinColumn(name = "auth_id", nullable = false)
+    @JsonBackReference
+    private Auth auth;
+
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Carrito> carritos;
+
+    public Cliente() {
+    }
+
+    public Cliente(Long id, String name, TipoUsuario tipoUsuario, String email, String phone, String dni, List<Carrito> carritos) {
+        this.id = id;
+        this.name = name;
+        this.tipoUsuario = tipoUsuario;
+        this.email = email;
+        this.phone = phone;
+        this.dni = dni;
+        this.carritos = carritos;
+    }
 
     public Long getId() {
         return id;

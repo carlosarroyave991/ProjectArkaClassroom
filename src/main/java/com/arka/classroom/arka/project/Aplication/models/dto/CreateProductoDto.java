@@ -22,6 +22,12 @@ public class CreateProductoDto {
 
     CreateCategoriaDto categoria;
 
+    public CreateProductoDto(String name, BigDecimal price, Integer stock) {
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+    }
+
     public Long getId() {
         return id;
     }

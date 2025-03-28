@@ -1,30 +1,21 @@
 package com.arka.classroom.arka.project.Aplication.Services;
 
 import com.arka.classroom.arka.project.Aplication.Services.exception.GeneralException;
-import com.arka.classroom.arka.project.Aplication.models.dto.CreateCarritoDto;
 import com.arka.classroom.arka.project.Aplication.models.dto.CreatePedidoDto;
-import com.arka.classroom.arka.project.Aplication.models.dto.CreateProductoDto;
 import com.arka.classroom.arka.project.Aplication.utils.ReferenceGenerator;
-import com.arka.classroom.arka.project.Domain.Entities.Carrito;
-import com.arka.classroom.arka.project.Domain.Entities.CarritoProducto;
-import com.arka.classroom.arka.project.Domain.Entities.Pedido;
-import com.arka.classroom.arka.project.Domain.Entities.Producto;
+import com.arka.classroom.arka.project.Domain.Entities.*;
 import com.arka.classroom.arka.project.Domain.Entities.enums.EstadoPedido;
-import com.arka.classroom.arka.project.Domain.Repositorys.CarritoRepository;
-import com.arka.classroom.arka.project.Domain.Repositorys.ClienteRepository;
-import com.arka.classroom.arka.project.Domain.Repositorys.PedidoRepository;
-import com.arka.classroom.arka.project.Domain.Repositorys.ProductoRepository;
+import com.arka.classroom.arka.project.Domain.Repositorys.*;
+import com.arka.classroom.arka.project.infraestructure.Feign.NotificationClient;
 import com.arka.classroom.arka.project.infraestructure.Mappers.PedidoMapper;
-import org.springframework.beans.BeanUtils;
+import com.arka.classroom.arka.project.infraestructure.Request.NotificacionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class PedidoService {
@@ -49,6 +40,9 @@ public class PedidoService {
 
     @Autowired
     CarritoService carritoService;
+
+    @Autowired
+    NotificationClient notificationClient;
 
     @Autowired
     PedidoMapper pedidoMapper;
@@ -218,6 +212,27 @@ public class PedidoService {
      */
     public List<Pedido> getPedidosByCliente(Long clienteId){
         return pedidoRepository.findByCarrito_Cliente_Id(clienteId);
+    }
+
+    /**
+     * Servicio que actualizar el estado del pedido y envia notificacion
+     * @param pedidoId
+     * @param nuevoEstado
+     */
+    public void updateEstadoPedido(Long pedidoId, EstadoPedido nuevoEstado) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new GeneralException("Pedido no encontrado"));
+
+        pedido.setEstadoPedido(String.valueOf(nuevoEstado));
+        pedidoRepository.save(pedido);
+
+        // Enviar notificación
+        NotificacionRequest notificationRequest = new NotificacionRequest();
+        notificationRequest.setTo(pedido.getCarrito().getCliente().getEmail());
+        notificationRequest.setSubject("Actualización de estado de pedido");
+        notificationRequest.setBody("El estado de su pedido ha sido actualizado a: " + nuevoEstado);
+
+        notificationClient.sendNotification(notificationRequest);
     }
 
     public void deleteById(Long id){

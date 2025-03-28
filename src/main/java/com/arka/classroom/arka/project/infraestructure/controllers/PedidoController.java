@@ -4,6 +4,7 @@ import com.arka.classroom.arka.project.Aplication.Services.PedidoService;
 import com.arka.classroom.arka.project.Aplication.models.dto.CreatePedidoDto;
 import com.arka.classroom.arka.project.Aplication.models.dto.CreateProductoDto;
 import com.arka.classroom.arka.project.Domain.Entities.Pedido;
+import com.arka.classroom.arka.project.Domain.Entities.enums.EstadoPedido;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpOutputMessage;
@@ -93,6 +94,16 @@ public class PedidoController {
     @PostMapping("/pedido/update")
     public ResponseEntity<CreatePedidoDto> updatePedido(@RequestBody CreatePedidoDto pedidoDto){
         return new ResponseEntity<>(pedidoService.updatePedido(pedidoDto), HttpStatus.OK);
+    }
+
+    /**
+     * Metodo Put que me permite actualizar el estado del pedido
+     */
+    @PutMapping("/pedido/{pedidoId}/estado")
+    public ResponseEntity<Void> updateEstadoPedido(@PathVariable("pedidoId")Long pedidoId,
+                                                   @RequestParam EstadoPedido nuevoEstado){
+        pedidoService.updateEstadoPedido(pedidoId, nuevoEstado);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

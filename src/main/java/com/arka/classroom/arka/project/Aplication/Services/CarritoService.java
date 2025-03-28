@@ -76,16 +76,33 @@ public class CarritoService {
      * Funcion para crear el carrito de compras
      * @return retorna la creacion de un carrito con sus productos
      */
+    @Transactional
     public List<CreateCarritoProductoResponse> crearCarrito(CreateCarritoDto carritoDto) {
-        //1) Buscar al cliente
-        Cliente cliente = clienteRepository.findById(carritoDto.getCliente().getId()).orElseThrow(() -> new GeneralException(ID_CLIENTE_NO_ENCONTRADO));
+        // 1) Buscar al cliente
+        Cliente cliente = clienteRepository.findById(carritoDto.getCliente().getId())
+                .orElseThrow(() -> new GeneralException(ID_CLIENTE_NO_ENCONTRADO));
 
-        //2) Creamos el carrito
+        // 2) Verificar el stock de todos los productos
+        for (CreateCarritoProductoDto createCarritoProductoDto : carritoDto.getCarritoProductos()) {
+            Optional<Producto> productoOptional = productoRepository.findById(createCarritoProductoDto.getProductos().getId());
+            if (productoOptional.isPresent()) {
+                Producto producto = productoOptional.get();
+                int nuevoStock = producto.getStock() - createCarritoProductoDto.getAmount();
+
+                if (nuevoStock < 0) {
+                    throw new GeneralException("Stock insuficiente para el producto: " + producto.getName());
+                }
+            } else {
+                throw new GeneralException(PRODUCTO_NO_ENCONTRADO);
+            }
+        }
+
+        // 3) Crear el carrito
         Carrito carrito = new Carrito();
         carrito.setCliente(cliente);
         carrito.setCreatedDate(new Date());
 
-        //Guardamos el carrito y aseguramos que tenga un ID
+        // Guardamos el carrito y aseguramos que tenga un ID
         carrito = carritoRepository.save(carrito);
 
         // Verificar que el carrito tiene un ID
@@ -93,26 +110,43 @@ public class CarritoService {
             throw new GeneralException("El carrito no tiene un ID después de ser guardado.");
         }
 
-        //3)Crear los CarritoProducto y asocialos al carrito
-        List<CarritoProducto> carritoProductoList = getProducto(carritoDto.getCarritoProductos());
+        // 4) Crear los CarritoProducto y asociarlos al carrito, y actualizar el stock de productos
+        List<CarritoProducto> carritoProductoList = new ArrayList<>();
+        for (CreateCarritoProductoDto createCarritoProductoDto : carritoDto.getCarritoProductos()) {
+            Optional<Producto> productoOptional = productoRepository.findById(createCarritoProductoDto.getProductos().getId());
+            if (productoOptional.isPresent()) {
+                Producto producto = productoOptional.get();
 
-        // Establecer el carrito para cada CarritoProducto
-        for (CarritoProducto cp : carritoProductoList) {
-            cp.setCarrito(carrito);
+                // Crear una nueva instancia de CarritoProducto
+                CarritoProducto carritoProducto = new CarritoProducto();
+                carritoProducto.setProducto(producto);
+                carritoProducto.setAmount(createCarritoProductoDto.getAmount());
+                carritoProducto.setCarrito(carrito);
+
+                // Actualizar el stock del producto
+                int nuevoStock = producto.getStock() - createCarritoProductoDto.getAmount();
+                producto.setStock(nuevoStock);
+                productoRepository.save(producto); // Guardar el producto con el stock actualizado
+
+                carritoProductoList.add(carritoProducto);
+            } else {
+                throw new GeneralException(PRODUCTO_NO_ENCONTRADO);
+            }
         }
 
-        //4)Guardar los CarritoProducto en el repositorio
+        // 5) Guardar los nuevos CarritoProducto en el repositorio
         carritoProductoRepository.saveAll(carritoProductoList);
 
-        //5)Asociar la lista de carritoProducto al carrito y guardarlo nuevamente
+        // 6) Asociar la lista de CarritoProducto al carrito y guardarlo nuevamente
         carrito.setCarritoProductos(carritoProductoList);
         carrito = carritoRepository.save(carrito);
 
-        //6)Convertir a CreateCarritoProductoResponse y devolver una respuesta
+        // 7) Convertir a CreateCarritoProductoResponse y devolver una respuesta
         List<CreateCarritoProductoResponse> response = carritoProductoMapper.carritoProductoToCreateCarritoProductoResponse(carritoProductoList);
 
         return response;
     }
+
 
     /**
      * NoService que me traera la informacion de los productos
@@ -133,6 +167,7 @@ public class CarritoService {
                     CarritoProducto newCarritoProducto = new CarritoProducto();
                     newCarritoProducto.setProducto(producto.get());
                     newCarritoProducto.setAmount(createCarritoProductoDto.getAmount());
+
                     carritoProductos.add(newCarritoProducto);
                 } else {
                     // Lanzar una excepción si el producto no es encontrado
@@ -176,31 +211,33 @@ public class CarritoService {
         Carrito carrito = carritoRepository.findById(carritoDto.getId())
                 .orElseThrow(() -> new GeneralException(CARRITO_NO_ENCONTRADO));
 
-        // 2) Actualizar la información del carrito
+        // 2) Verificar si el carrito tiene un pedido asociado
+        Optional<Pedido> pedidoOptional = pedidoRepository.findByCarrito_Id(carrito.getId());
+        if (pedidoOptional.isPresent()) {
+            throw new GeneralException("El carrito tiene un pedido asociado y no puede ser actualizado.");
+        }
+
+        // 3) Actualizar la información del carrito
         Cliente cliente = clienteRepository.findById(carritoDto.getCliente().getId())
                 .orElseThrow(() -> new GeneralException(ID_CLIENTE_NO_ENCONTRADO));
         carrito.setCliente(cliente);
         carrito.setCreatedDate(carritoDto.getCreatedDate() != null ? carritoDto.getCreatedDate() : carrito.getCreatedDate());
 
-        // 3) Eliminar los CarritoProducto antiguos
+        // 4) Eliminar los CarritoProducto antiguos
         carritoProductoRepository.deleteAllByCarritoId(carrito.getId());
 
-        // 4) Crear los nuevos CarritoProducto y asociarlos al carrito
+        // 5) Crear los nuevos CarritoProducto y asociarlos al carrito
         List<CarritoProducto> carritoProductoList = getProducto(carritoDto.getCarritoProductos());
         for (CarritoProducto cp : carritoProductoList) {
             cp.setCarrito(carrito);
         }
 
-        // 5) Guardar los nuevos CarritoProducto en el repositorio
+        // 6) Guardar los nuevos CarritoProducto en el repositorio
         carritoProductoRepository.saveAll(carritoProductoList);
 
-        // 6) Asociar la lista de carritoProducto al carrito y guardarlo nuevamente
+        // 7) Asociar la lista de carritoProducto al carrito y guardarlo nuevamente
         carrito.setCarritoProductos(carritoProductoList);
         carrito = carritoRepository.save(carrito);
-
-        // 7) Eliminar el pedido asociado al carrito si existe
-        Optional<Pedido> pedidoOptional = pedidoRepository.findByCarrito_Id(carrito.getId());
-        pedidoOptional.ifPresent(pedidoRepository::delete);
 
         // 8) Convertir a CreateCarritoDto y devolver la respuesta
         CreateCarritoDto response = carritoMapper.toDto(carrito);
